@@ -1,0 +1,19 @@
+# Configuração do ffigen — geração dos bindings Dart a partir do header C.
+#
+# NÃO EXECUTAR AINDA: a `libautogest` (.so/.dll/.dylib) ainda não foi
+# compilada pelo backend. Quando estiver pronta:
+#
+#   dart run ffigen
+#
+# ...gera lib/src/ffi/autogest_bindings.dart; depois é só preencher a
+# FfiService (lib/services/ffi_service.dart) com as chamadas geradas e
+# trocar MockService() por FfiService() em lib/main.dart (ponto único).
+name: AutogestBindings
+description: Bindings FFI gerados a partir de native/autogest.h
+output: lib/src/ffi/autogest_bindings.dart
+headers:
+  entry-points:
+    - native/autogest.h
+comments:
+  style: any
+  length: full
