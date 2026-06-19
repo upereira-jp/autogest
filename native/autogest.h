@@ -70,6 +70,49 @@ typedef enum {
 } CodigoErro;
 
 /* -------------------------------------------------------------------- *
+ *  API de persistência (Banco) 
+ *  Feito por: Herculano [19/06 - 01:33] - (Deixando claro aqui pq a gente n alinhou como seriam documentadas alterações kkkkk)
+ * -------------------------------------------------------------------- */
+
+typedef struct BancoAutogest BancoAutogest;
+
+BancoAutogest *banco_abrir(const char *caminho);
+
+int banco_criar_tabelas(BancoAutogest *banco);
+void banco_fechar(BancoAutogest *banco);
+
+int banco_inserir_veiculo(
+    BancoAutogest *banco,
+    const Veiculo *veiculo
+);
+
+int banco_inserir_abastecimento(
+    BancoAutogest *banco,
+    const Abastecimento *abastecimento
+);
+
+int banco_inserir_manutencao(
+    BancoAutogest *banco,
+    const Manutencao *manutencao
+);
+
+Abastecimento *banco_listar_abastecimentos(
+    BancoAutogest *banco,
+    int *quantidade
+);
+
+Manutencao *banco_listar_manutencoes(
+    BancoAutogest *banco,
+    int *quantidade
+);
+
+void banco_liberar_abastecimentos(Abastecimento *lista);
+void banco_liberar_manutencoes(Manutencao *lista);
+
+const char *banco_ultimo_erro(BancoAutogest *banco);
+
+
+/* -------------------------------------------------------------------- *
  *  STRUCTS
  * -------------------------------------------------------------------- */
 typedef struct {
