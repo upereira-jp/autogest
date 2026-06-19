@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 struct BancoAutogest {
-    sqlite3 *conexao;
+    //sqlite3 *conexao;
 };
 
 
