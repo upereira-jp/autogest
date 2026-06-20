@@ -2,7 +2,7 @@ add_library(
     autogest
     SHARED
     src/banco.c
-    src/dados.c
+    src/inputs.c
     src/validacao.c
     src/calculos.c
     src/alertas.c
@@ -13,5 +13,5 @@ target_include_directories(
     autogest
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor
+    ${CMAKE_CURRENT_SOURCE_DIR}/vedor
 )
