@@ -1,4 +1,4 @@
-//calma edmundo, que aqui é o pai que tá no controle; Código preenche e retorna uma struct.
+//calma edmundo, que aqui é o pai que tá no controle; Código preenche as entradas e retorna uma struct.
 //max - 1, para ter espaço para o '/0', deixando claro
 #include "autogest.h"
 
