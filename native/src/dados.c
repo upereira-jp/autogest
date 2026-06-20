@@ -1,4 +1,5 @@
 //calma edmundo, que aqui é o pai que tá no controle; Código preenche e retorna uma struct.
+//max - 1, para ter espaço para o '/0', deixando claro
 #include "autogest.h"
 
 Veiculo criar_veiculo(const char* nome, const char* placa, const char* marca, const char* modelo, int ano) {
