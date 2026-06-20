@@ -185,6 +185,7 @@ int validar_data(time_t data);
 int validar_valor(double valor);
 int validar_litros(double litros);
 int validar_intervalo_dias(int dias);
+int validar_string(char *str); //Para verificar se string n ta vazia
 
 int editar_veiculo(Veiculo* v, const char* campo, const char* valor);
 int editar_abastecimento(Abastecimento* a, const char* campo, const char* valor);
