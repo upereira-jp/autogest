@@ -13,6 +13,7 @@ class ResumoGastos {
     required this.totalAbastecimentos,
     required this.totalManutencoes,
     required this.totalGeral,
+    required this.gastoPorMesCategoria,
   });
 
   final List<double> gastoPorMes;
@@ -20,7 +21,7 @@ class ResumoGastos {
   final double totalAbastecimentos;
   final double totalManutencoes;
   final double totalGeral;
-
+  final List<List<double>> gastoPorMesCategoria;
   /// Resumo zerado — usado pelo MockService como placeholder.
   factory ResumoGastos.zero() => ResumoGastos(
         gastoPorMes: List<double>.filled(12, 0),
@@ -29,5 +30,15 @@ class ResumoGastos {
         totalAbastecimentos: 0,
         totalManutencoes: 0,
         totalGeral: 0,
+
+
+        gastoPorMesCategoria: List.generate(
+          12,
+          (_) => List<double>.filled(
+            TipoManutencao.values.length + 1,
+            0,
+          ),
+        ),
+
       );
 }

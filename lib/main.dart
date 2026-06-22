@@ -13,15 +13,15 @@ import 'providers/dashboard_provider.dart';
 import 'providers/manutencao_provider.dart';
 import 'screens/home_shell.dart';
 import 'services/autogest_service.dart';
-import 'services/mock_service.dart';
 import 'theme/app_theme.dart';
+
+import 'services/ffi_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Seleciona o backend SQLite por plataforma (desktop/web via FFI;
-  // Android/iOS seguem no plugin sqflite padrão).
   initDatabaseFactory();
   await initializeDateFormatting('pt_BR', null);
+
   runApp(const AutoGestApp());
 }
 
@@ -41,8 +41,7 @@ class AutoGestApp extends StatelessWidget {
 
         // --- Camada de cálculo: ÚNICO PONTO DE TROCA mock ↔ ffi ---
         // Quando o núcleo C compilar, troque por: const FfiService().
-        Provider<AutogestService>(create: (_) => const MockService()),
-
+        Provider<AutogestService>(create: (_) => FfiService()),
         // --- Estado por tela (junta DAOs + serviço) ---
         ChangeNotifierProvider<DashboardProvider>(
           create: (c) => DashboardProvider(

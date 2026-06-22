@@ -1,15 +1,15 @@
 #ifndef AUTOGEST_H
 #define AUTOGEST_H
 
-#include <time.h>   /* time_t */
-
+//#include <time.h>   /* time_t */
+#include <stdint.h>
 /* ==================================================================== *
  *  AutoGest — Contrato FFI (header)
  *  Declara structs, enums, constantes e as 21 funcoes do nucleo em C.
  *  Implementacoes ficam em: dados.c, validacao.c, calculos.c, alertas.c
  *
  *  Convencoes:
- *   - Datas: time_t (inteiro). O Dart envia/recebe como numero.
+ *   - Datas: int64_t (inteiro). O Dart envia/recebe como numero.
  *   - Erros: int com valores do enum CodigoErro (0 = sucesso, <0 = erro).
  *   - Strings: recebidas como const char*, copiadas com strncpy.
  *   - Listas dinamicas: alocadas com malloc; liberadas pelo chamador.
@@ -45,6 +45,9 @@ typedef enum {
     TOTAL_TIPOS_MANUTENCAO      /* sentinela — vale como contagem */
 } TipoManutencao;
 
+#define CATEGORIA_COMBUSTIVEL 0
+#define TOTAL_CATEGORIAS_GASTO (TOTAL_TIPOS_MANUTENCAO + 1)
+
 typedef enum {
     EM_DIA,
     PROXIMO,
@@ -73,7 +76,7 @@ typedef enum {
  *  API de persistência (Banco) 
  *  Feito por: Herculano [19/06 - 01:33] - (Deixando claro aqui pq a gente n alinhou como seriam documentadas alterações kkkkk)
  * -------------------------------------------------------------------- */
-
+/*
 typedef struct BancoAutogest BancoAutogest;
 
 BancoAutogest *banco_abrir(const char *caminho);
@@ -110,7 +113,7 @@ void banco_liberar_abastecimentos(Abastecimento *lista);
 void banco_liberar_manutencoes(Manutencao *lista);
 
 const char *banco_ultimo_erro(BancoAutogest *banco);
-
+*/
 
 /* -------------------------------------------------------------------- *
  *  STRUCTS
@@ -125,7 +128,7 @@ typedef struct {
 
 typedef struct {
     int    id;
-    time_t data;
+    int64_t data;
     double litros;
     double valor_total;
     double km;
@@ -136,7 +139,7 @@ typedef struct {
     int            id;
     TipoManutencao tipo;
     char           descricao[MAX_DESCRICAO];
-    time_t         data_realizada;
+    int64_t          data_realizada;
     double         custo;
     double         km_ultima;       /* dormente — preenchido pelo km atual */
     double         intervalo_km;    /* dormente — reservado para a Fase 2  */
@@ -149,7 +152,7 @@ typedef struct {
     TipoManutencao tipo;
     StatusAlerta   status;
     int            dias_restantes;
-    time_t         data_proxima;
+    int64_t         data_proxima;
 } Alerta;
 
 typedef struct {
@@ -158,6 +161,7 @@ typedef struct {
     double total_abastecimentos;
     double total_manutencoes;
     double total_geral;
+    double gasto_por_mes_categoria[12][TOTAL_CATEGORIAS_GASTO];
 } ResumoGastos;
 
 /* ==================================================================== *
@@ -168,12 +172,12 @@ typedef struct {
 Veiculo       criar_veiculo(const char* nome, const char* placa,
                             const char* marca, const char* modelo, int ano);
 
-Abastecimento criar_abastecimento(int id, time_t data, double litros,
+Abastecimento criar_abastecimento(int id, int64_t data, double litros,
                                   double valor_total, double km,
                                   const char* combustivel);
 
 Manutencao    criar_manutencao(int id, TipoManutencao tipo, const char* descricao,
-                               time_t data_realizada, double custo,
+                               int64_t data_realizada, double custo,
                                int intervalo_dias);
 
 /* ==================================================================== *
@@ -181,11 +185,11 @@ Manutencao    criar_manutencao(int id, TipoManutencao tipo, const char* descrica
  *  Retornam int (CodigoErro): SUCESSO (0) ou um codigo negativo.
  * ==================================================================== */
 int validar_km(double km_novo, double km_anterior);
-int validar_data(time_t data);
+int validar_data(int64_t data);
 int validar_valor(double valor);
 int validar_litros(double litros);
 int validar_intervalo_dias(int dias);
-int validar_string(char *str); //Para verificar se string n ta vazia
+int validar_string(const char *str); //Para verificar se string n ta vazia
 
 int editar_veiculo(Veiculo* v, const char* campo, const char* valor);
 int editar_abastecimento(Abastecimento* a, const char* campo, const char* valor);
@@ -199,7 +203,7 @@ double calcular_custo_por_km(Abastecimento* lista, int total,
                              double km_inicio, double km_fim);
 
 double calcular_gasto_periodo(Abastecimento* lista, int total,
-                              time_t inicio, time_t fim);
+                              int64_t inicio, int64_t fim);
 
 double calcular_km_por_litro(double km_atual, double km_anterior, double litros);
 
@@ -215,13 +219,13 @@ ResumoGastos calcular_resumo_gastos(Abastecimento* abastecimentos, int total_aba
  *  gerar_lista_alertas aloca com malloc; o chamador libera com
  *  liberar_lista_alertas (seguro chamar com NULL).
  * ==================================================================== */
-int          calcular_dias_restantes(time_t data_realizada, int intervalo_dias,
-                                     time_t hoje);
+int          calcular_dias_restantes(int64_t data_realizada, int intervalo_dias,
+                                     int64_t hoje);
 
 StatusAlerta classificar_alerta(int dias_restantes, int janela_aviso);
 
 Alerta*      gerar_lista_alertas(Manutencao* manutencoes, int total_manut,
-                                 time_t hoje, int janela_aviso,
+                                 int64_t hoje, int janela_aviso,
                                  int* total_alertas);
 
 void         liberar_lista_alertas(Alerta* lista);

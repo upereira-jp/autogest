@@ -5,33 +5,37 @@
 #include <ctype.h>
 #include <time.h>
 #include "autogest.h"
-#include "sqlite3.h"
+//#include "sqlite3.h"
 
 /*
 ==================== VALIDAR ====================
 */
 
-int validar_km(double km_novo, double km_anterior){
-    if(km_novo < km_anterior){
-        return ERRO_KM_DECRESCENTE;
-    }
-    if(km_novo <= 0){
+int validar_km(double km_novo, double km_anterior) {
+    if (km_novo < 0) {
         return ERRO_VALOR_NEGATIVO;
     }
+
+    if (km_novo < km_anterior) {
+        return ERRO_KM_DECRESCENTE;
+    }
+
     return SUCESSO;
 }
 
-int validar_data(time_t data){
-    time_t hoje = time(NULL);
-    if(data>hoje){
+int validar_data(int64_t data) {
+    int64_t hoje = (int64_t)time(NULL);
+
+    if (data <= 0 || data > hoje) {
         return ERRO_DATA_INVALIDA;
     }
+
     return SUCESSO;
 }
 
 int validar_valor(double valor){
-    if(valor <= 0){
-        return -ERRO_VALOR_NEGATIVO;
+    if(valor < 0){
+        return ERRO_VALOR_NEGATIVO;
     }
     return SUCESSO;
 }
@@ -50,8 +54,8 @@ int validar_intervalo_dias(int dias){
     return SUCESSO;
 }
 
-int validar_string(char* str){
-    if(str[0] == '\0'){
+int validar_string(const char *str) {
+    if (str == NULL || str[0] == '\0') {
         return ERRO_CAMPO_VAZIO;
     }
     return SUCESSO;

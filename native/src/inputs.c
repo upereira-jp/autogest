@@ -25,7 +25,7 @@ Veiculo criar_veiculo(const char* nome, const char* placa, const char* marca, co
     return v;
 }
 
-Abastecimento criar_abastecimento(int id, time_t data, double litros, double valor_total, double km, const char* combustivel) {
+Abastecimento criar_abastecimento(int id, int64_t data, double litros, double valor_total, double km, const char* combustivel) {
     Abastecimento a;
     int i;
     a.id = id;
@@ -40,7 +40,7 @@ Abastecimento criar_abastecimento(int id, time_t data, double litros, double val
     return a;
 }
 
-Manutencao criar_manutencao(int id, TipoManutencao tipo, const char* descricao, time_t data_realizada, double custo, int intervalo_dias) {
+Manutencao criar_manutencao(int id, TipoManutencao tipo, const char* descricao, int64_t data_realizada, double custo, int intervalo_dias) {
     Manutencao m;
     int i;
     m.id = id;

@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include <time.h>
 #include "autogest.h"
-#include "sqlite3.h"
+//#include "sqlite3.h"
 
 //valor total de abastecimento por km
 double calcular_custo_por_km(Abastecimento* lista, int total, double km_inicio, double km_fim) {
@@ -30,7 +30,7 @@ double calcular_custo_por_km(Abastecimento* lista, int total, double km_inicio, 
 }
 
 //soma de valor por periodo de tempo (obviamente)
-double calcular_gasto_periodo(Abastecimento* lista, int total, time_t inicio, time_t fim) {
+double calcular_gasto_periodo(Abastecimento* lista, int total, int64_t inicio, int64_t fim) {
     if(lista == NULL || total <= 0){
         return 0.0;
     }
@@ -139,8 +139,14 @@ ResumoGastos calcular_resumo_gastos(Abastecimento* abastecimentos, int total_aba
     resumo.total_manutencoes = 0.0;
     resumo.total_geral = 0.0;
     
-    for(int i = 0; i < 12; i++){
-        resumo.gasto_por_mes[i] = 0.0;
+    for (int mes = 0; mes < 12; mes++) {
+        resumo.gasto_por_mes[mes] = 0.0;
+
+        for (int categoria = 0;
+            categoria < TOTAL_CATEGORIAS_GASTO;
+            categoria++) {
+            resumo.gasto_por_mes_categoria[mes][categoria] = 0.0;
+        }
     }
     for(int i = 0; i < TOTAL_TIPOS_MANUTENCAO; i++){
         resumo.gasto_por_categoria[i] = 0.0;
@@ -152,11 +158,13 @@ ResumoGastos calcular_resumo_gastos(Abastecimento* abastecimentos, int total_aba
             resumo.total_abastecimentos += abastecimentos[i].valor_total;
             
             // Descobre o mês do abastecimento
-            struct tm* info_tempo = localtime(&abastecimentos[i].data);
+            time_t data_abastecimento = (time_t)abastecimentos[i].data;
+            struct tm* info_tempo = localtime(&data_abastecimento);
             if(info_tempo != NULL){
                 int mes = info_tempo->tm_mon; // 0 = Janeiro, 11 = Dezembro
                 if(mes >= 0 && mes < 12){
                     resumo.gasto_por_mes[mes] += abastecimentos[i].valor_total;
+                    resumo.gasto_por_mes_categoria[mes][CATEGORIA_COMBUSTIVEL] += abastecimentos[i].valor_total;
                 }
             }
         }
@@ -174,11 +182,15 @@ ResumoGastos calcular_resumo_gastos(Abastecimento* abastecimentos, int total_aba
             }
 
             // Descobre o mês da manutenção
-            struct tm* info_tempo = localtime(&manutencoes[i].data_realizada);
+            time_t data_manutencao = (time_t)manutencoes[i].data_realizada;
+            struct tm* info_tempo = localtime(&data_manutencao);
             if(info_tempo != NULL){
                 int mes = info_tempo->tm_mon;
                 if(mes >= 0 && mes < 12){
                     resumo.gasto_por_mes[mes] += manutencoes[i].custo;
+                    if (cat >= 0 && cat < TOTAL_TIPOS_MANUTENCAO) {
+                        resumo.gasto_por_mes_categoria[mes][cat + 1] += manutencoes[i].custo;
+                    }
                 }
             }
         }

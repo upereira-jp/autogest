@@ -7,15 +7,17 @@
  * Lógica: Converte o intervalo de dias para segundos (1 dia = 86400 segundos), 
  * soma à data realizada para achar o vencimento e compara com a data de hoje.
  */
-int calcular_dias_restantes(time_t data_realizada, int intervalo_dias, time_t hoje) {
-    // Calcula a data de vencimento em timestamp
-    time_t data_vencimento = data_realizada + (time_t)(intervalo_dias * 86400);
-    
-    // difftime retorna a diferença em segundos de forma segura
-    double diferenca_segundos = difftime(data_vencimento, hoje);
-    
-    // Converte de volta para dias e trunca (casting para int)
-    return (int)(diferenca_segundos / 86400.0);
+int calcular_dias_restantes(
+    int64_t data_realizada,
+    int intervalo_dias,
+    int64_t hoje
+) {
+    int64_t data_vencimento =
+        data_realizada + (int64_t)intervalo_dias * 86400;
+
+    int64_t diferenca_segundos = data_vencimento - hoje;
+
+    return (int)(diferenca_segundos / 86400);
 }
 
 /**
@@ -37,7 +39,13 @@ StatusAlerta classificar_alerta(int dias_restantes, int janela_aviso) {
  * Lógica: Percorre as manutenções buscando quais precisam de atenção.
  * Aloca a lista de alertas dinamicamente (com malloc) e retorna o ponteiro.
  */
-Alerta* gerar_lista_alertas(Manutencao* manutencoes, int total_manut, time_t hoje, int janela_aviso, int* total_alertas) {
+Alerta* gerar_lista_alertas(
+    Manutencao* manutencoes,
+    int total_manut,
+    int64_t hoje,
+    int janela_aviso,
+    int* total_alertas
+) {
     // Proteção contra ponteiros nulos
     if (manutencoes == NULL || total_manut <= 0 || total_alertas == NULL) {
         if (total_alertas != NULL) *total_alertas = 0;
@@ -83,8 +91,9 @@ Alerta* gerar_lista_alertas(Manutencao* manutencoes, int total_manut, time_t hoj
             lista_alertas[indice_atual].dias_restantes = dias;
             
             // Calcula e salva o timestamp de quando é a data limite exata
-            lista_alertas[indice_atual].data_proxima  = manutencoes[i].data_realizada + (time_t)(manutencoes[i].intervalo_dias * 86400);
-            
+            lista_alertas[indice_atual].data_proxima =
+            manutencoes[i].data_realizada +
+            (int64_t)manutencoes[i].intervalo_dias * 86400;
             indice_atual++;
         }
     }

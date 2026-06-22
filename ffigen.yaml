@@ -17,3 +17,9 @@ headers:
 comments:
   style: any
   length: full
+
+llvm-path:
+  - 'C:\Program Files\LLVM'
+
+compiler-opts:
+  - '-IC:\PROGRA~1\LLVM\lib\clang\22\include'
