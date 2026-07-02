@@ -48,7 +48,7 @@ typedef enum {
 } StatusAlerta;
 
 typedef enum {
-    POR_TEMPO,
+    POR_TEMPO, //unico no momento
     POR_KM,
     POR_AMBOS
 } CriterioAlerta;
