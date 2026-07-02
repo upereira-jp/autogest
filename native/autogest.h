@@ -4,22 +4,17 @@
 //#include <time.h>   /* time_t */
 #include <stdint.h>
 /* ==================================================================== *
- *  AutoGest — Contrato FFI (header)
- *  Declara structs, enums, constantes e as 21 funcoes do nucleo em C.
- *  Implementacoes ficam em: dados.c, validacao.c, calculos.c, alertas.c
+ *  Declara as funções do nucleo em C.
  *
- *  Convencoes:
+ *  Convenções:
  *   - Datas: int64_t (inteiro). O Dart envia/recebe como numero.
  *   - Erros: int com valores do enum CodigoErro (0 = sucesso, <0 = erro).
  *   - Strings: recebidas como const char*, copiadas com strncpy.
  *   - Listas dinamicas: alocadas com malloc; liberadas pelo chamador.
- *   - Campos dormentes (km_ultima, intervalo_km, criterio): existem na
- *     struct mas nao geram comportamento na Fase 1.
+ *   - Campos que não estçao sendo utilizados no momento: km_ultima, intervalo_km, criterio.
  * ==================================================================== */
 
-/* -------------------------------------------------------------------- *
- *  CONSTANTES
- * -------------------------------------------------------------------- */
+//Constantes
 #define MAX_NOME             50
 #define MAX_PLACA             9
 #define MAX_MARCA            30
@@ -28,9 +23,7 @@
 #define MAX_DESCRICAO       100
 #define JANELA_AVISO_PADRAO  30   /* dias de antecedencia do alerta "PROXIMO" */
 
-/* -------------------------------------------------------------------- *
- *  ENUMS
- * -------------------------------------------------------------------- */
+//enums
 typedef enum {
     TROCA_OLEO,
     FILTRO_AR,
@@ -42,7 +35,7 @@ typedef enum {
     BALANCEAMENTO,
     PASTILHA_FREIO,
     OUTROS,
-    TOTAL_TIPOS_MANUTENCAO      /* sentinela — vale como contagem */
+    TOTAL_TIPOS_MANUTENCAO      // sentinela — vale como contagem
 } TipoManutencao;
 
 #define CATEGORIA_COMBUSTIVEL 0
@@ -115,9 +108,7 @@ void banco_liberar_manutencoes(Manutencao *lista);
 const char *banco_ultimo_erro(BancoAutogest *banco);
 */
 
-/* -------------------------------------------------------------------- *
- *  STRUCTS
- * -------------------------------------------------------------------- */
+//structs
 typedef struct {
     char nome[MAX_NOME];
     char placa[MAX_PLACA];
@@ -127,32 +118,32 @@ typedef struct {
 } Veiculo;
 
 typedef struct {
-    int    id;
+    int id;
     int64_t data;
     double litros;
     double valor_total;
     double km;
-    char   combustivel[MAX_COMBUSTIVEL];
+    char combustivel[MAX_COMBUSTIVEL];
 } Abastecimento;
 
 typedef struct {
     int            id;
     TipoManutencao tipo;
-    char           descricao[MAX_DESCRICAO];
-    int64_t          data_realizada;
-    double         custo;
-    double         km_ultima;       /* dormente — preenchido pelo km atual */
-    double         intervalo_km;    /* dormente — reservado para a Fase 2  */
-    int            intervalo_dias;
-    CriterioAlerta criterio;        /* Fase 1: sempre POR_TEMPO            */
+    char descricao[MAX_DESCRICAO];
+    int64_t data_realizada;
+    double custo;
+    double km_ultima;   // dormente — preenchido pelo km atual
+    double intervalo_km;  //dormente — reservado para a Fase 2
+    int intervalo_dias;
+    CriterioAlerta criterio;  // Fase 1: sempre POR_TEMPO
 } Manutencao;
 
 typedef struct {
-    int            id_manutencao;
+    int id_manutencao;
     TipoManutencao tipo;
-    StatusAlerta   status;
-    int            dias_restantes;
-    int64_t         data_proxima;
+    StatusAlerta status;
+    int dias_restantes;
+    int64_t data_proxima;
 } Alerta;
 
 typedef struct {
@@ -164,26 +155,12 @@ typedef struct {
     double gasto_por_mes_categoria[12][TOTAL_CATEGORIAS_GASTO];
 } ResumoGastos;
 
-/* ==================================================================== *
- *  GRUPO 1 — DADOS   (src/dados.c)
- *  Preenchem e retornam uma struct. Nao validam — a validacao e feita
- *  antes, pelas funcoes do Grupo 2.
- * ==================================================================== */
-Veiculo       criar_veiculo(const char* nome, const char* placa,
-                            const char* marca, const char* modelo, int ano);
+//inputs-dados; Preenchem e retornam uma struct. Validacao feita pelas funcoes de validacao.
+Veiculo criar_veiculo(const char* nome, const char* placa, const char* marca, const char* modelo, int ano);
+Abastecimento criar_abastecimento(int id, int64_t data, double litros, double valor_total, double km, const char* combustivel);
+Manutencao criar_manutencao(int id, TipoManutencao tipo, const char* descricao, int64_t data_realizada, double custo, int intervalo_dias);
 
-Abastecimento criar_abastecimento(int id, int64_t data, double litros,
-                                  double valor_total, double km,
-                                  const char* combustivel);
-
-Manutencao    criar_manutencao(int id, TipoManutencao tipo, const char* descricao,
-                               int64_t data_realizada, double custo,
-                               int intervalo_dias);
-
-/* ==================================================================== *
- *  GRUPO 2 — VALIDACAO   (src/validacao.c)
- *  Retornam int (CodigoErro): SUCESSO (0) ou um codigo negativo.
- * ==================================================================== */
+//validação; Retornam int (CodigoErro): SUCESSO (0) ou um codigo negativo.
 int validar_km(double km_novo, double km_anterior);
 int validar_data(int64_t data);
 int validar_valor(double valor);
@@ -195,39 +172,18 @@ int editar_veiculo(Veiculo* v, const char* campo, const char* valor);
 int editar_abastecimento(Abastecimento* a, const char* campo, const char* valor);
 int editar_manutencao(Manutencao* m, const char* campo, const char* valor);
 
-/* ==================================================================== *
- *  GRUPO 3 — CALCULOS   (src/calculos.c)
- *  Recebem vetores de registros (vindos do banco) e devolvem valores.
- * ==================================================================== */
-double calcular_custo_por_km(Abastecimento* lista, int total,
-                             double km_inicio, double km_fim);
-
-double calcular_gasto_periodo(Abastecimento* lista, int total,
-                              int64_t inicio, int64_t fim);
-
+//calúlos;  Recebem vetores de registros (vindos do banco) e devolvem valores.
+double calcular_custo_por_km(Abastecimento* lista, int total, double km_inicio, double km_fim);
+double calcular_gasto_periodo(Abastecimento* lista, int total, int64_t inicio, int64_t fim);
 double calcular_km_por_litro(double km_atual, double km_anterior, double litros);
-
 double obter_km_atual(Abastecimento* lista, int total);
-
 double calcular_km_por_litro_geral(Abastecimento* lista, int total);
+ResumoGastos calcular_resumo_gastos(Abastecimento* abastecimentos, int total_abast, Manutencao* manutencoes, int total_manut);
 
-ResumoGastos calcular_resumo_gastos(Abastecimento* abastecimentos, int total_abast,
-                                    Manutencao* manutencoes, int total_manut);
-
-/* ==================================================================== *
- *  GRUPO 4 — MOTOR DE ALERTAS   (src/alertas.c)
- *  gerar_lista_alertas aloca com malloc; o chamador libera com
- *  liberar_lista_alertas (seguro chamar com NULL).
- * ==================================================================== */
-int          calcular_dias_restantes(int64_t data_realizada, int intervalo_dias,
-                                     int64_t hoje);
-
+//Alertas;  gerar_lista_alertas aloca com malloc; o chamador libera com liberar_lista_alertas (dboa chamar com NULL).
+int calcular_dias_restantes(int64_t data_realizada, int intervalo_dias,  int64_t hoje);
 StatusAlerta classificar_alerta(int dias_restantes, int janela_aviso);
-
-Alerta*      gerar_lista_alertas(Manutencao* manutencoes, int total_manut,
-                                 int64_t hoje, int janela_aviso,
-                                 int* total_alertas);
-
-void         liberar_lista_alertas(Alerta* lista);
+Alerta* gerar_lista_alertas(Manutencao* manutencoes, int total_manut, int64_t hoje, int janela_aviso,int* total_alertas);
+void liberar_lista_alertas(Alerta* lista);
 
 #endif /* AUTOGEST_H */
