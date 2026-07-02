@@ -1,7 +1,7 @@
 #ifndef AUTOGEST_H
 #define AUTOGEST_H
 
-//#include <time.h>   /* time_t */
+//#include <time.h> time_t 
 #include <stdint.h>
 /* ==================================================================== *
  *  Declara as funções do nucleo em C.
@@ -54,15 +54,15 @@ typedef enum {
 } CriterioAlerta;
 
 typedef enum {
-    SUCESSO                 =  0,
-    ERRO_KM_DECRESCENTE     = -1,
-    ERRO_VALOR_NEGATIVO     = -2,
-    ERRO_LITROS_NEGATIVO    = -3,
-    ERRO_DATA_INVALIDA      = -4,
+    SUCESSO =  0,
+    ERRO_KM_DECRESCENTE = -1,
+    ERRO_VALOR_NEGATIVO = -2,
+    ERRO_LITROS_NEGATIVO = -3,
+    ERRO_DATA_INVALIDA = -4,
     ERRO_INTERVALO_INVALIDO = -5,
-    ERRO_INDICE_INVALIDO    = -6,
-    ERRO_MEMORIA            = -7,
-    ERRO_CAMPO_VAZIO        = -8
+    ERRO_INDICE_INVALIDO = -6,
+    ERRO_MEMORIA = -7,
+    ERRO_CAMPO_VAZIO = -8
 } CodigoErro;
 
 /* -------------------------------------------------------------------- *
