@@ -143,4 +143,4 @@ StatusAlerta classificar_alerta(int dias_restantes, int janela_aviso);
 Alerta* gerar_lista_alertas(Manutencao* manutencoes, int total_manut, int64_t hoje, int janela_aviso,int* total_alertas);
 void liberar_lista_alertas(Alerta* lista);
 
-#endif /* AUTOGEST_H */
+#endif
