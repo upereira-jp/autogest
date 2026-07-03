@@ -98,11 +98,7 @@ flutter test
 
 ## APK pronto para instalar
 
-O APK ja gerado fica em:
-
-```text
-instalador/AutoGest.apk
-```
+O APK do AutoGest está disponível na aba Releases deste repositório.
 
 Ele pode ser instalado manualmente no Android seguindo os passos da proxima
 secao. Para gerar um novo APK release, use os comandos abaixo.
