@@ -3,11 +3,13 @@ import 'package:provider/provider.dart';
 
 import '../../models/alerta.dart';
 import '../../models/manutencao.dart';
+import '../../providers/dashboard_provider.dart';
 import '../../providers/manutencao_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/formatters.dart';
 import '../../widgets/status_pill.dart';
+import 'manutencao_form.dart';
 
 /// Manutenções: alertas (status + dias restantes) no topo e a lista das
 /// manutenções realizadas. Status e dias são derivados → vazios no mock.
@@ -55,13 +57,13 @@ class _TituloSecao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        texto,
-        style: const TextStyle(
-          color: AppColors.texto,
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-        ),
-      );
+    texto,
+    style: const TextStyle(
+      color: AppColors.texto,
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+    ),
+  );
 }
 
 class _AlertaTile extends StatelessWidget {
@@ -151,10 +153,27 @@ class _ManutencaoTile extends StatelessWidget {
               Fmt.moeda(m.custo),
               style: AppText.mono(size: 15, color: AppColors.acento),
             ),
+            const SizedBox(width: 4),
+            IconButton(
+              tooltip: 'Editar',
+              onPressed: () => _editar(context),
+              icon: const Icon(Icons.edit_outlined),
+              color: AppColors.textoSecundario,
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _editar(BuildContext context) async {
+    final salvou = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => ManutencaoForm(manutencao: manutencao)),
+    );
+
+    if (salvou == true && context.mounted) {
+      await context.read<DashboardProvider>().carregar();
+    }
   }
 }
 

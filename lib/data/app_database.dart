@@ -5,9 +5,8 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// Regras de persistência (ver briefing §6):
 ///  - três tabelas: `veiculo`, `abastecimento`, `manutencao`;
-///  - **imutável** — a UI só faz INSERT e SELECT, nunca UPDATE/DELETE
-///    (editar = inserir uma nova linha; o registro mais recente é o de
-///    maior `id`);
+///  - a UI faz INSERT, SELECT e UPDATE para correções de registros já
+///    cadastrados;
 ///  - datas em INTEGER (segundos Unix) para casar com o `time_t` do C.
 ///
 /// O schema espelha as structs do `native/autogest.h` e foi desenhado

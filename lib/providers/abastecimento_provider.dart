@@ -24,8 +24,9 @@ class AbastecimentoProvider extends ChangeNotifier {
 
   /// Maior km já registrado — base para validar "km ≥ último registrado".
   /// `null` quando ainda não há abastecimentos.
-  double? get ultimoKm =>
-      _itens.isEmpty ? null : _itens.map((a) => a.km).reduce((a, b) => a > b ? a : b);
+  double? get ultimoKm => _itens.isEmpty
+      ? null
+      : _itens.map((a) => a.km).reduce((a, b) => a > b ? a : b);
 
   /// km/L do trecho daquele abastecimento (derivado → placeholder no mock).
   double kmPorLitroDe(Abastecimento a) => _kmPorLitro[a.id] ?? double.nan;
@@ -43,6 +44,11 @@ class AbastecimentoProvider extends ChangeNotifier {
 
   Future<void> adicionar(Abastecimento a) async {
     await _dao.inserir(a);
+    await carregar();
+  }
+
+  Future<void> atualizar(Abastecimento a) async {
+    await _dao.atualizar(a);
     await carregar();
   }
 

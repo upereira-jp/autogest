@@ -65,7 +65,9 @@ typedef enum {
     ERRO_CAMPO_VAZIO = -8
 } CodigoErro;
 
-//structs
+/* -------------------------------------------------------------------- *
+ *  STRUCTS
+ * -------------------------------------------------------------------- */
 typedef struct {
     char nome[MAX_NOME];
     char placa[MAX_PLACA];

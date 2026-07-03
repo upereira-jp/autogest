@@ -1,7 +1,7 @@
 import '../models/abastecimento.dart';
 import 'app_database.dart';
 
-/// Acesso à tabela `abastecimento` (apenas INSERT e SELECT).
+/// Acesso à tabela `abastecimento`.
 class AbastecimentoDao {
   const AbastecimentoDao(this._db);
 
@@ -11,6 +11,22 @@ class AbastecimentoDao {
   Future<int> inserir(Abastecimento a) async {
     final db = await _db.database;
     return db.insert('abastecimento', a.toMap());
+  }
+
+  /// Atualiza um abastecimento existente.
+  Future<int> atualizar(Abastecimento a) async {
+    final id = a.id;
+    if (id == null) {
+      throw ArgumentError('Abastecimento sem id não pode ser atualizado.');
+    }
+
+    final db = await _db.database;
+    return db.update(
+      'abastecimento',
+      a.toMap(),
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   /// Lista todos os abastecimentos, do mais recente para o mais antigo

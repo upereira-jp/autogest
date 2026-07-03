@@ -8,11 +8,13 @@ import '../../providers/manutencao_provider.dart';
 import '../../widgets/campo_data.dart';
 import '../../widgets/parse_num.dart';
 
-/// Formulário de nova manutenção. Valida: intervalo > 0, custo ≥ 0,
-/// data não futura. O campo `km_ultima` é preenchido pelo provider com o
-/// km atual do veículo.
+/// Formulário de manutenção. Valida: intervalo > 0, custo ≥ 0,
+/// data não futura. Ao criar, o campo `km_ultima` é preenchido pelo provider
+/// com o km atual do veículo.
 class ManutencaoForm extends StatefulWidget {
-  const ManutencaoForm({super.key});
+  const ManutencaoForm({super.key, this.manutencao});
+
+  final Manutencao? manutencao;
 
   @override
   State<ManutencaoForm> createState() => _ManutencaoFormState();
@@ -27,6 +29,22 @@ class _ManutencaoFormState extends State<ManutencaoForm> {
   DateTime _data = DateTime.now();
   TipoManutencao _tipo = TipoManutencao.trocaOleo;
 
+  bool get _editando => widget.manutencao != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final atual = widget.manutencao;
+    if (atual == null) return;
+
+    _tipo = atual.tipo;
+    _descricao.text = atual.descricao;
+    _data = atual.data;
+    _custo.text = _numeroParaCampo(atual.custo);
+    _intervalo.text = atual.intervaloDias.toString();
+  }
+
   @override
   void dispose() {
     _descricao.dispose();
@@ -37,21 +55,36 @@ class _ManutencaoFormState extends State<ManutencaoForm> {
 
   Future<void> _salvar() async {
     if (!_formKey.currentState!.validate()) return;
-    final nova = Manutencao(
+
+    final atual = widget.manutencao;
+    final manutencao = Manutencao(
+      id: atual?.id,
       tipo: _tipo,
       descricao: _descricao.text.trim(),
       data: _data,
       custo: parseNum(_custo.text) ?? 0,
       intervaloDias: int.parse(_intervalo.text.trim()),
+      kmUltima: atual?.kmUltima ?? 0,
+      intervaloKm: atual?.intervaloKm ?? 0,
+      criterio: atual?.criterio ?? CriterioAlerta.porTempo,
     );
-    await context.read<ManutencaoProvider>().adicionar(nova);
+
+    final provider = context.read<ManutencaoProvider>();
+    if (_editando) {
+      await provider.atualizar(manutencao);
+    } else {
+      await provider.adicionar(manutencao);
+    }
+
     if (mounted) Navigator.of(context).pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nova manutenção')),
+      appBar: AppBar(
+        title: Text(_editando ? 'Editar manutenção' : 'Nova manutenção'),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -86,7 +119,9 @@ class _ManutencaoFormState extends State<ManutencaoForm> {
                 labelText: 'Custo',
                 prefixText: r'R$ ',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
               ],
@@ -117,11 +152,16 @@ class _ManutencaoFormState extends State<ManutencaoForm> {
             FilledButton.icon(
               onPressed: _salvar,
               icon: const Icon(Icons.check),
-              label: const Text('Salvar'),
+              label: Text(_editando ? 'Atualizar' : 'Salvar'),
             ),
           ],
         ),
       ),
     );
+  }
+
+  static String _numeroParaCampo(double valor) {
+    final casas = valor.truncateToDouble() == valor ? 0 : 2;
+    return valor.toStringAsFixed(casas).replaceAll('.', ',');
   }
 }

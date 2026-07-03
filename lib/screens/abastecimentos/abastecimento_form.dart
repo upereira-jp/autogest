@@ -8,17 +8,19 @@ import '../../theme/formatters.dart';
 import '../../widgets/campo_data.dart';
 import '../../widgets/parse_num.dart';
 
-/// Formulário de novo abastecimento. Valida: litros e valor > 0,
-/// km ≥ último registrado, data não futura.
+/// Formulário de abastecimento. Valida: litros e valor > 0,
+/// km ≥ último registrado ao criar, data não futura.
 class AbastecimentoForm extends StatefulWidget {
-  const AbastecimentoForm({super.key});
+  const AbastecimentoForm({super.key, this.abastecimento});
+
+  final Abastecimento? abastecimento;
 
   @override
   State<AbastecimentoForm> createState() => _AbastecimentoFormState();
 }
 
 class _AbastecimentoFormState extends State<AbastecimentoForm> {
-  static const _combustiveis = ['Gasolina', 'Etanol', 'Diesel'];
+  static const _combustiveis = ['Gasolina', 'Álcool', 'Diesel'];
 
   final _formKey = GlobalKey<FormState>();
   final _litros = TextEditingController();
@@ -27,6 +29,22 @@ class _AbastecimentoFormState extends State<AbastecimentoForm> {
 
   DateTime _data = DateTime.now();
   String _combustivel = _combustiveis.first;
+
+  bool get _editando => widget.abastecimento != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final atual = widget.abastecimento;
+    if (atual == null) return;
+
+    _data = atual.data;
+    _combustivel = _combustivelParaCampo(atual.combustivel);
+    _litros.text = _numeroParaCampo(atual.litros);
+    _valor.text = _numeroParaCampo(atual.valorTotal);
+    _km.text = _numeroParaCampo(atual.km);
+  }
 
   @override
   void dispose() {
@@ -38,23 +56,36 @@ class _AbastecimentoFormState extends State<AbastecimentoForm> {
 
   Future<void> _salvar() async {
     if (!_formKey.currentState!.validate()) return;
-    final novo = Abastecimento(
+
+    final abastecimento = Abastecimento(
+      id: widget.abastecimento?.id,
       data: _data,
       litros: parseNum(_litros.text)!,
       valorTotal: parseNum(_valor.text)!,
       km: parseNum(_km.text)!,
       combustivel: _combustivel,
     );
-    await context.read<AbastecimentoProvider>().adicionar(novo);
+
+    final provider = context.read<AbastecimentoProvider>();
+    if (_editando) {
+      await provider.atualizar(abastecimento);
+    } else {
+      await provider.adicionar(abastecimento);
+    }
+
     if (mounted) Navigator.of(context).pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final ultimoKm = context.read<AbastecimentoProvider>().ultimoKm;
+    final ultimoKm = _editando
+        ? null
+        : context.read<AbastecimentoProvider>().ultimoKm;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Novo abastecimento')),
+      appBar: AppBar(
+        title: Text(_editando ? 'Editar abastecimento' : 'Novo abastecimento'),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -82,7 +113,9 @@ class _AbastecimentoFormState extends State<AbastecimentoForm> {
                 labelText: 'Litros',
                 suffixText: 'L',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [_numFmt],
               validator: (v) => _validarPositivo(v, 'Informe os litros'),
             ),
@@ -93,7 +126,9 @@ class _AbastecimentoFormState extends State<AbastecimentoForm> {
                 labelText: 'Valor total',
                 prefixText: r'R$ ',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [_numFmt],
               validator: (v) => _validarPositivo(v, 'Informe o valor'),
             ),
@@ -107,7 +142,9 @@ class _AbastecimentoFormState extends State<AbastecimentoForm> {
                     ? null
                     : 'Último registrado: ${Fmt.km(ultimoKm)}',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [_numFmt],
               validator: (v) => _validarKm(v, ultimoKm),
             ),
@@ -115,7 +152,7 @@ class _AbastecimentoFormState extends State<AbastecimentoForm> {
             FilledButton.icon(
               onPressed: _salvar,
               icon: const Icon(Icons.check),
-              label: const Text('Salvar'),
+              label: Text(_editando ? 'Atualizar' : 'Salvar'),
             ),
           ],
         ),
@@ -123,8 +160,23 @@ class _AbastecimentoFormState extends State<AbastecimentoForm> {
     );
   }
 
-  static final _numFmt =
-      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'));
+  static final _numFmt = FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'));
+
+  static String _numeroParaCampo(double valor) {
+    final casas = valor.truncateToDouble() == valor ? 0 : 2;
+    return valor.toStringAsFixed(casas).replaceAll('.', ',');
+  }
+
+  static String _combustivelParaCampo(String valor) {
+    final normalizado = valor.toLowerCase();
+    if (normalizado.contains('etanol') ||
+        normalizado.contains('alcool') ||
+        normalizado.contains('álcool')) {
+      return 'Álcool';
+    }
+    if (_combustiveis.contains(valor)) return valor;
+    return _combustiveis.first;
+  }
 
   String? _validarPositivo(String? v, String vazio) {
     final n = parseNum(v ?? '');

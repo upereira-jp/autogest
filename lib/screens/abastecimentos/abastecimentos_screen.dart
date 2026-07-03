@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 
 import '../../models/abastecimento.dart';
 import '../../providers/abastecimento_provider.dart';
+import '../../providers/dashboard_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/formatters.dart';
+import 'abastecimento_form.dart';
 
 /// Lista de abastecimentos. O km/L de cada trecho é derivado → "—" no mock.
 class AbastecimentosScreen extends StatelessWidget {
@@ -20,22 +22,22 @@ class AbastecimentosScreen extends StatelessWidget {
       body: p.carregando
           ? const Center(child: CircularProgressIndicator())
           : p.itens.isEmpty
-              ? const _Vazio()
-              : RefreshIndicator(
-                  onRefresh: p.carregar,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-                    itemCount: p.itens.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 10),
-                    itemBuilder: (_, i) {
-                      final a = p.itens[i];
-                      return _AbastecimentoTile(
-                        abastecimento: a,
-                        kmPorLitro: p.kmPorLitroDe(a),
-                      );
-                    },
-                  ),
-                ),
+          ? const _Vazio()
+          : RefreshIndicator(
+              onRefresh: p.carregar,
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                itemCount: p.itens.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
+                itemBuilder: (_, i) {
+                  final a = p.itens[i];
+                  return _AbastecimentoTile(
+                    abastecimento: a,
+                    kmPorLitro: p.kmPorLitroDe(a),
+                  );
+                },
+              ),
+            ),
     );
   }
 }
@@ -73,6 +75,13 @@ class _AbastecimentoTile extends StatelessWidget {
                   Fmt.moeda(a.valorTotal),
                   style: AppText.mono(size: 15, color: AppColors.acento),
                 ),
+                const SizedBox(width: 4),
+                IconButton(
+                  tooltip: 'Editar',
+                  onPressed: () => _editar(context),
+                  icon: const Icon(Icons.edit_outlined),
+                  color: AppColors.textoSecundario,
+                ),
               ],
             ),
             const SizedBox(height: 4),
@@ -96,6 +105,18 @@ class _AbastecimentoTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _editar(BuildContext context) async {
+    final salvou = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => AbastecimentoForm(abastecimento: abastecimento),
+      ),
+    );
+
+    if (salvou == true && context.mounted) {
+      await context.read<DashboardProvider>().carregar();
+    }
   }
 }
 
@@ -135,8 +156,11 @@ class _Vazio extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.local_gas_station_outlined,
-                size: 48, color: AppColors.textoSecundario),
+            Icon(
+              Icons.local_gas_station_outlined,
+              size: 48,
+              color: AppColors.textoSecundario,
+            ),
             SizedBox(height: 12),
             Text(
               'Nenhum abastecimento ainda.\nToque em "+" para registrar o primeiro.',

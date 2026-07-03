@@ -37,7 +37,11 @@ class ManutencaoProvider extends ChangeNotifier {
     notifyListeners();
 
     _itens = await _dao.listar();
-    _alertas = _service.gerarAlertas(_itens, DateTime.now(), kJanelaAvisoPadrao);
+    _alertas = _service.gerarAlertas(
+      _itens,
+      DateTime.now(),
+      kJanelaAvisoPadrao,
+    );
 
     _carregando = false;
     notifyListeners();
@@ -56,6 +60,11 @@ class ManutencaoProvider extends ChangeNotifier {
       kmUltima: kmAtual,
     );
     await _dao.inserir(completa);
+    await carregar();
+  }
+
+  Future<void> atualizar(Manutencao m) async {
+    await _dao.atualizar(m);
     await carregar();
   }
 }
