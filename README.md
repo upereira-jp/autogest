@@ -4,6 +4,12 @@ AutoGest e um aplicativo de controle automotivo para registrar abastecimentos,
 manutencoes e gastos do veiculo. O projeto tambem mantem um prototipo em C para
 terminal, usado como base para regras de negocio e futuras integracoes nativas.
 
+Foi desenvolvido para compor o projeto final da matéria "Introduçaõ à Programação", ministrado pelo professro Edmundo Spoto, do curso "Sistemas de Informação" do Instituto de Informática - Universidade Federal de Goiás
+Desenvolvido por:
+* Gustavo Pereira Herculano
+* João Pedro Pereira de Carvalho
+* Augusto Rodrigues Feitosa
+
 ## Principais recursos
 
 - Cadastro e edicao dos dados do veiculo.
